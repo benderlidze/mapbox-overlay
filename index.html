@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Add a default marker to a web map</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        #overlay {
+            position: absolute;
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #static {
+            display: flex;
+            width: 300px;
+            height: 300px;
+            -webkit-box-shadow: 0px 0px 24px 13px rgba(34, 60, 80, 0.3);
+            -moz-box-shadow: 0px 0px 24px 13px rgba(34, 60, 80, 0.3);
+            box-shadow: 0px 0px 24px 13px rgba(34, 60, 80, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shadow-darken75-bold"
+        style="width: 300px; height: 200px; position: absolute; pointer-events: none; z-index: 1; background-image: url(&quot;https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/-122.3384,37.5419,9,0/300x200?access_token=pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2p0MG01MXRqMW45cjQzb2R6b2ptc3J4MSJ9.zA2W0IkI0c6KaAhJfk9bWg&quot;); background-size: contain;">
+    </div>
+
+    <div id="main">
+        <div id="overlay">
+            <div id="static"></div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <script>
+
+        const static = document.getElementById("static");
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2VyZ2JlciIsImEiOiJja3dwOWgzeGQwYWdyMm9xb2pkMDFvYmNuIn0.H9AJ_NLmDNYMed6dvu_Q0A';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [12.550343, 55.665957],
+            zoom: 8
+        });
+
+        map.on("load", () => {
+            map.on("moveend", () => {
+                const { lng, lat } = map.getCenter()
+                const zoom = map.getZoom()
+                const imageUrl = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/${lng},${lat},${zoom},0/300x300?access_token=${mapboxgl.accessToken}`;
+                fetch(imageUrl)
+                    .then(response => response.blob())
+                    .then(imageBlob => {
+                        console.log('imageBlob', imageBlob);
+                        // Then create a local URL for that image and print it 
+                        const imageObjectURL = URL.createObjectURL(imageBlob);
+                        static.style.backgroundImage = `url(${imageObjectURL})`;
+                    });
+            })
+            map
+                .on("click", clearBackground)
+                .on("movestart", clearBackground)
+                .on("touchstart", clearBackground)
+        })
+
+        function clearBackground() {
+            static.style.backgroundImage = ``;
+        }
+    </script>
+
+</body>
+
+</html>
