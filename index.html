@@ -73,14 +73,13 @@
                 fetch(imageUrl)
                     .then(response => response.blob())
                     .then(imageBlob => {
-                        console.log('imageBlob', imageBlob);
+                        // console.log('imageBlob', imageBlob);
                         // Then create a local URL for that image and print it 
                         const imageObjectURL = URL.createObjectURL(imageBlob);
                         static.style.backgroundImage = `url(${imageObjectURL})`;
                     });
             })
             map
-                .on("click", clearBackground)
                 .on("movestart", clearBackground)
                 .on("touchstart", clearBackground)
         })
