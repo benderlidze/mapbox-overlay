@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Add a default marker to a web map</title>
+    <title>Welcome to This is Just a Test</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
@@ -33,21 +33,33 @@
 
         #static {
             display: flex;
-            width: 300px;
-            height: 300px;
-            -webkit-box-shadow: 0px 0px 24px 13px rgba(34, 60, 80, 0.3);
-            -moz-box-shadow: 0px 0px 24px 13px rgba(34, 60, 80, 0.3);
-            box-shadow: 0px 0px 24px 13px rgba(34, 60, 80, 0.3);
+            width: calc(100vw - 30%);
+            height: calc(100vh - 20%);
+            -webkit-box-shadow: 0px 0px 24px 13px rgba(255, 255, 255, 1);
+            -moz-box-shadow: 0px 0px 24px 13px rgba(255, 255, 255, 1);
+            box-shadow: 0px 0px 24px 13px rgba(255, 255, 255, 1);
+        }
+
+        #getStaticMap {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            border: 1px solid white;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
+            border-radius: 5px;
+            z-index: 2;
+            color: white;
         }
     </style>
 </head>
 
 <body>
-    <div class="shadow-darken75-bold"
-        style="width: 300px; height: 200px; position: absolute; pointer-events: none; z-index: 1; background-image: url(&quot;https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/-122.3384,37.5419,9,0/300x200?access_token=pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2p0MG01MXRqMW45cjQzb2R6b2ptc3J4MSJ9.zA2W0IkI0c6KaAhJfk9bWg&quot;); background-size: contain;">
-    </div>
 
     <div id="main">
+
+        <button id="getStaticMap">Get static map</button>
+
         <div id="overlay">
             <div id="static"></div>
         </div>
@@ -56,33 +68,40 @@
 
     <script>
 
+        const getStaticMapButton = document.getElementById("getStaticMap");
         const static = document.getElementById("static");
         mapboxgl.accessToken = 'pk.eyJ1Ijoid2hlZWxlcncxMjMiLCJhIjoiY2tudjNubmloMGdlYTJ2bW00bXV2dXVweSJ9.PCgDoCYtKZB9hoei5KhfVg';
         const map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: [12.550343, 55.665957],
-            zoom: 8
+            style: 'mapbox://styles/mapbox/satellite-v9',
+            center: [-74.6623, 40.1958],
+            zoom: 2
         });
 
         map.on("load", () => {
-            map.on("moveend", () => {
-                const { lng, lat } = map.getCenter()
-                const zoom = map.getZoom()
-                const imageUrl = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/${lng},${lat},${zoom},0/300x300?access_token=${mapboxgl.accessToken}`;
-                fetch(imageUrl)
-                    .then(response => response.blob())
-                    .then(imageBlob => {
-                        // console.log('imageBlob', imageBlob);
-                        // Then create a local URL for that image and print it 
-                        const imageObjectURL = URL.createObjectURL(imageBlob);
-                        static.style.backgroundImage = `url(${imageObjectURL})`;
-                    });
-            })
             map
                 .on("movestart", clearBackground)
                 .on("touchstart", clearBackground)
         })
+
+        getStaticMapButton.addEventListener("click", getStatiImage)
+
+        function getStatiImage() {
+
+            const cHeight = static.offsetHeight
+            const cWidth = static.offsetWidth
+
+            const { lng, lat } = map.getCenter()
+            const zoom = map.getZoom()
+            const imageUrl = `https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${lng},${lat},${zoom},0/${cWidth}x${cHeight}?access_token=${mapboxgl.accessToken}`;
+
+            fetch(imageUrl)
+                .then(response => response.blob())
+                .then(imageBlob => {
+                    const imageObjectURL = URL.createObjectURL(imageBlob);
+                    static.style.backgroundImage = `url(${imageObjectURL})`;
+                });
+        }
 
         function clearBackground() {
             static.style.backgroundImage = ``;
